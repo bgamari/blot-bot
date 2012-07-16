@@ -61,23 +61,34 @@ module bearing_pin() {
     cylinder(r=0.97*bearing_inner_dia/2, h=2.9*bearing_width);
 }
 
+// Sample wheel
 module wheel() {
     bearing_groove = 2;
     difference() {
+        // Gear
         //cylinder(r=wheel_dia/2, h=wheel_height);
         render()
         gear(circular_pitch=gear_pitch, number_of_teeth=130,
             gear_thickness=wheel_height, rim_thickness=wheel_height, hub_thickness=wheel_height,
             involute_facets=1, $fn=2);
 
+        // Centering pin
         cylinder(r=8.2, h=3*wheel_height, center=true);
 
+        // Remove excess material
+        difference() {
+            cylinder(r=0.35*wheel_dia/2, h=2*5, center=true);
+            cylinder(r=0.1*wheel_dia/2, h=2*8, center=true);
+        }
+
+        // Beaker holes
         translate([0, 0, wheel_height])
         for (theta = [0:360/n_beakers:360])
         rotate([0, 0, theta])
         translate([beaker_offset, 0, 0])
         cylinder(r=beaker_dia/2, h=2*beaker_recess, center=true);
 
+        // Bearing groove
         translate([0, 0, -bearing_groove]);
         difference() {
             cylinder(r=roller_r+1.5*bearing_width, h=2*bearing_groove, center=true);
@@ -86,6 +97,7 @@ module wheel() {
     }
 }
 
+// Stepper motor gear
 module motor_gear() {
     difference() {
         gear(circular_pitch=gear_pitch, number_of_teeth=20,
@@ -101,6 +113,7 @@ module motor_gear() {
     }
 }
 
+// Assembly diagram
 module assembly() {
     base();
 
@@ -110,6 +123,7 @@ module assembly() {
     translate([180, -30, 0]) motor_mount();
 }
 
+// Print plate
 module print_plate() {
     base();
 
@@ -121,6 +135,7 @@ module print_plate() {
     motor_gear();
 }
 
+// Print plate for the wheel pieces
 module wheel_print(i) {
     for (i = [0:3])
     translate([0, 2*i*wheel_height, 0])
@@ -133,6 +148,7 @@ module wheel_print(i) {
     translate([40,-40,0]) motor_gear();
 }
 
+// Stepper motor mount
 module motor_mount() {
     size = 120;
     mount_height = 100;
