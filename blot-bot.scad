@@ -13,6 +13,7 @@ roller_r = 250/2;
 n_arms = 3;
 arm_width = 10;
 
+// 608 bearing
 bearing_width = 7;
 bearing_outer_dia = 22;
 bearing_inner_dia = 8;
@@ -69,16 +70,17 @@ module wheel() {
         //cylinder(r=wheel_dia/2, h=wheel_height);
         render()
         gear(circular_pitch=gear_pitch, number_of_teeth=130,
-            gear_thickness=wheel_height, rim_thickness=wheel_height, hub_thickness=wheel_height,
-            involute_facets=1, $fn=2);
+            gear_thickness=wheel_height, rim_thickness=wheel_height,
+            hub_thickness=wheel_height, involute_facets=1, $fn=2);
 
         // Centering pin
-        cylinder(r=8.2, h=3*wheel_height, center=true);
+        cylinder(r=bearing_outer_dia/4, h=3*wheel_height, center=true);
+        cylinder(r=bearing_outer_dia/2, h=2*bearing_width, center=true);
 
         // Remove excess material
         difference() {
-            cylinder(r=0.35*wheel_dia/2, h=2*5, center=true);
-            cylinder(r=0.1*wheel_dia/2, h=2*8, center=true);
+            cylinder(r=0.35*wheel_dia/2, h=2*7, center=true);
+            cylinder(r=0.1*wheel_dia/2, h=4*8, center=true);
         }
 
         // Beaker holes
