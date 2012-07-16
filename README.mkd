@@ -1,0 +1,8 @@
+# The Blot-bot
+
+This is a 3D printable design for a robot to automate the Western blot and
+related repetitive experiments where a sample needs to be cycled between
+immersion in several chemical solutions.
+
+More description to come.
+
