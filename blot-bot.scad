@@ -93,8 +93,8 @@ module wheel() {
         // Bearing groove
         translate([0, 0, -bearing_groove]);
         difference() {
-            cylinder(r=roller_r+1.5*bearing_width, h=2*bearing_groove, center=true);
-            cylinder(r=roller_r-1.5*bearing_width, h=4*bearing_groove, center=true);
+            cylinder(r=roller_r+1.5*bearing_width, h=2*bearing_groove, center=true, $fn=40);
+            cylinder(r=roller_r-1.5*bearing_width, h=4*bearing_groove, center=true, $fn=40);
         }
     }
 }
