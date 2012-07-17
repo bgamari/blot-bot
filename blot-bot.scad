@@ -51,7 +51,7 @@ module base() {
         bearing_holder();
     }
 
-    cylinder(r=bearing_inner_dia/2, h=50);
+    cylinder(r=bearing_inner_dia/2-0.1, h=50);
 
     for (theta=[0:360/n_arms:360])
     rotate([0,0,theta])
