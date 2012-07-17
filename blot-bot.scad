@@ -3,6 +3,7 @@ include <MCAD/constants.scad>;
 
 wheel_height = 8;
 wheel_dia = 350;
+wheel_pieces = 10;
 
 beaker_recess = 5;
 beaker_offset = 94;
@@ -81,6 +82,11 @@ module wheel() {
         difference() {
             cylinder(r=0.35*wheel_dia/2, h=0.75*wheel_height*2, center=true);
             cylinder(r=0.1*wheel_dia/2, h=4*wheel_height, center=true);
+
+            for (theta = [0:360/wheel_pieces:360])
+            rotate([0,0,theta])
+            translate([0,-3/2,0])
+            cube([wheel_dia/2, 3, 2*wheel_height]);
         }
 
         // Beaker holes
@@ -138,13 +144,17 @@ module print_plate() {
 }
 
 // Print plate for the wheel pieces
-module wheel_print(i) {
-    for (i = [0:3])
+module wheel_print() {
+    for (i = [0:wheel_pieces-1])
     translate([0, 2*i*wheel_height, 0])
     rotate([90,0,0])
     intersection() {
-        rotate([0,0,90*i]) wheel();
-        cube([1000,1000,1000]);
+        rotate([0,0,i*360/wheel_pieces]) wheel();
+        linear_extrude(h=1000)
+        polygon([[0,0],
+                 [1000, 0],
+                 [1000*cos(360/wheel_pieces), 1000*sin(360/wheel_pieces)]
+                ]);
     }
 
     translate([40,-40,0]) motor_gear();
@@ -167,6 +177,10 @@ module motor_mount() {
         translate([-size/4, 0, 0])
         cube([size, 3*size, size/5], center=true);
 
+        // Motor shaft hole
+        cylinder(r=23/2, h=2*mount_height);
+
+        // Motor screw holes
         translate([0,0,mount_height/2])
         for (theta = [45:90:360])
         rotate([0, 0, theta])
