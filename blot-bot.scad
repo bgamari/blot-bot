@@ -64,7 +64,7 @@ module bearing_pin() {
 
 // Sample wheel
 module wheel() {
-    bearing_groove = 1.5;
+    bearing_groove = 1;
     difference() {
         // Gear
         //cylinder(r=wheel_dia/2, h=wheel_height);
@@ -75,7 +75,7 @@ module wheel() {
 
         // Centering pin
         cylinder(r=bearing_outer_dia/4, h=3*wheel_height, center=true);
-        cylinder(r=bearing_outer_dia/2, h=2*bearing_width, center=true);
+        cylinder(r=bearing_outer_dia/2, h=0.8*bearing_width*2, center=true);
 
         // Remove excess material
         difference() {
