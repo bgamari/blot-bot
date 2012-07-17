@@ -148,16 +148,21 @@ module wheel_print() {
     for (i = [0:wheel_pieces-1])
     translate([0, 2*i*wheel_height, 0])
     rotate([90,0,0])
-    intersection() {
-        rotate([0,0,i*360/wheel_pieces]) wheel();
-        linear_extrude(h=1000)
-        polygon([[0,0],
-                 [1000, 0],
-                 [1000*cos(360/wheel_pieces), 1000*sin(360/wheel_pieces)]
-                ]);
-    }
+    difference() {
+        intersection() {
+            rotate([0,0,i*360/wheel_pieces]) wheel();
+            linear_extrude(h=1000)
+            polygon([[0,0],
+                     [1000, 0],
+                     [1000*cos(360/wheel_pieces), 1000*sin(360/wheel_pieces)]
+                    ]);
+        }
 
-    translate([40,-40,0]) motor_gear();
+        // Tick marks
+        for (j = [1:i+1])
+        translate([0.73*wheel_dia*cos(2*j)/2, 0.73*wheel_dia*sin(2*j)/2, wheel_height])
+        cylinder(h=2, r=1, center=true);
+    }
 }
 
 // Stepper motor mount
