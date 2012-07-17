@@ -1,15 +1,15 @@
 use <MCAD/involute_gears.scad>;
 include <MCAD/constants.scad>;
 
-wheel_height = 10;
+wheel_height = 8;
 wheel_dia = 350;
 
 beaker_recess = 5;
-beaker_offset = 100;
+beaker_offset = 94;
 beaker_dia = 60;
 n_beakers = 8;
 
-roller_r = 250/2;
+roller_r = 200/2;
 n_arms = 3;
 arm_width = 10;
 
@@ -51,7 +51,7 @@ module base() {
         bearing_holder();
     }
 
-    cylinder(r=8, h=50);
+    cylinder(r=bearing_inner_dia/2, h=50);
 
     for (theta=[0:360/n_arms:360])
     rotate([0,0,theta])
@@ -64,12 +64,12 @@ module bearing_pin() {
 
 // Sample wheel
 module wheel() {
-    bearing_groove = 2;
+    bearing_groove = 1.5;
     difference() {
         // Gear
         //cylinder(r=wheel_dia/2, h=wheel_height);
         render()
-        gear(circular_pitch=gear_pitch, number_of_teeth=130,
+        gear(circular_pitch=gear_pitch, number_of_teeth=120,
             gear_thickness=wheel_height, rim_thickness=wheel_height,
             hub_thickness=wheel_height, involute_facets=1, $fn=2);
 
@@ -79,8 +79,8 @@ module wheel() {
 
         // Remove excess material
         difference() {
-            cylinder(r=0.35*wheel_dia/2, h=2*7, center=true);
-            cylinder(r=0.1*wheel_dia/2, h=4*8, center=true);
+            cylinder(r=0.35*wheel_dia/2, h=0.75*wheel_height*2, center=true);
+            cylinder(r=0.1*wheel_dia/2, h=4*wheel_height, center=true);
         }
 
         // Beaker holes
@@ -154,7 +154,7 @@ module wheel_print(i) {
 module motor_mount() {
     size = 120;
     mount_height = 100;
-    wall_thickness = 4;
+    wall_thickness = 2;
     translate([0,0,mount_height/2])
     difference() {
         cube([size, size, mount_height], center=true);
