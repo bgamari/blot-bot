@@ -3,15 +3,16 @@ include <MCAD/constants.scad>;
 
 wheel_height = 8;
 wheel_dia = 350;
-wheel_pieces = 10;
+wheel_pieces = 8;
 
 beaker_recess = 5;
-beaker_offset = 94;
+beaker_offset = 124;
 beaker_dia = 60;
 n_beakers = 8;
 
-roller_r = 200/2;
-n_arms = 3;
+roller_r = 124;
+roller_recess = 3;
+n_arms = 4;
 arm_width = 10;
 
 // 608 bearing
@@ -63,46 +64,97 @@ module bearing_pin() {
     cylinder(r=0.97*bearing_inner_dia/2, h=2.9*bearing_width);
 }
 
-// Sample wheel
-module wheel() {
-    bearing_groove = 1;
+module dovetail(fudge=0) {
+    a = 5 + fudge;
+    b = 15 + fudge;
+    c = 15;
+    polygon([[-a,0], [-b,c], [b,c], [a,0]]);
+}
+
+module regular_polygon(n, min_r) {
+    for (theta = [0:360/n:360])
+    rotate(theta)
+    square([min_r, min_r/tan(360/n)], center=true);
+}
+
+module wheel_center() {
+    size = 89;
+
     difference() {
-        // Gear
-        //cylinder(r=wheel_dia/2, h=wheel_height);
-        render()
-        gear(circular_pitch=gear_pitch, number_of_teeth=120,
-            gear_thickness=wheel_height, rim_thickness=wheel_height,
-            hub_thickness=wheel_height, involute_facets=1, $fn=2);
+        linear_extrude(height=wheel_height)
+        regular_polygon(6, size);
 
-        // Centering pin
-        cylinder(r=bearing_outer_dia/4, h=3*wheel_height, center=true);
-        cylinder(r=bearing_outer_dia/2, h=0.8*bearing_width*2, center=true);
+        // Bearing
+        cylinder(r=bearing_outer_dia/2, h=2*bearing_width, center=true);
+        cylinder(r=8/2, h=3*wheel_height);
 
-        // Remove excess material
+        // Dovetails
+        rotate(360/12)
+        for (theta = [0:360/6:360])
+        rotate(theta)
+        translate([0,-45,-wheel_height])
+        linear_extrude(height=3*wheel_height)
+        dovetail(0.3);
+    }
+}
+
+module wheel_sector() {
+    holder_r = 1.2*beaker_dia / 2;
+
+    difference() {
+        linear_extrude(height=wheel_height) {
+            rotate(90) dovetail();
+            difference() {
+                translate([0.3*holder_r,0])
+                rotate(45)
+                square([holder_r, holder_r], center=true);
+
+                translate([-holder_r/2, 0])
+                square([holder_r, holder_r], center=true);
+            }
+
+            translate([holder_r, 0])
+            circle(r=holder_r);
+        }
+        translate([0,0,5])
+        translate([holder_r, 0, 0])
+        cylinder(r=beaker_dia/2, h=wheel_height, center=true);
+    }
+}
+
+module annulus(r, dr) {
+    difference() {
+        circle(r=r+dr/2);
+        circle(r=r-dr/2);
+    }
+}
+    
+module wheel_sectors() {
+    for (theta = [0:360/6:360])
+    rotate([0,0,theta])
+    translate([45,0,0])
+    wheel_sector();
+
+    difference() {
         difference() {
-            cylinder(r=0.35*wheel_dia/2, h=0.75*wheel_height*2, center=true);
-            cylinder(r=0.1*wheel_dia/2, h=4*wheel_height, center=true);
+            render()
+            gear(circular_pitch=gear_pitch, number_of_teeth=120,
+                gear_thickness=wheel_height, involute_facets=1, $fn=2);
 
-            for (theta = [0:360/wheel_pieces:360])
-            rotate([0,0,theta])
-            translate([0,-3/2,0])
-            cube([wheel_dia/2, 3, 2*wheel_height]);
+            cylinder(r=115, h=3*wheel_height, center=true);
         }
 
-        // Beaker holes
-        translate([0, 0, wheel_height])
-        for (theta = [0:360/n_beakers:360])
-        rotate([0, 0, theta])
-        translate([beaker_offset, 0, 0])
-        cylinder(r=beaker_dia/2, h=2*beaker_recess, center=true);
-
-        // Bearing groove
-        translate([0, 0, -bearing_groove]);
         difference() {
-            cylinder(r=roller_r+1.1*bearing_width, h=2*bearing_groove, center=true, $fn=40);
-            cylinder(r=roller_r-1.1*bearing_width, h=4*bearing_groove, center=true, $fn=40);
+            translate([0,0,-roller_recess])
+            linear_extrude(height=2*roller_recess)
+            annulus(roller_r, 1.5*bearing_width);
         }
     }
+}
+
+module wheel_assembly() {
+    wheel_center();
+    wheel_sectors();
 }
 
 // Stepper motor gear
@@ -110,7 +162,7 @@ module motor_gear() {
     difference() {
         gear(circular_pitch=gear_pitch, number_of_teeth=20,
             gear_thickness=wheel_height, rim_thickness=wheel_height,
-            hub_thickness=20, hub_diameter=20, bore_diameter=5);
+            hub_thickness=20, hub_diameter=20, bore_diameter=5.5);
 
         translate([4, 0, 10 + 5 - m3_nut_minor_dia/2])
         translate([0, 0, 20/2])
@@ -125,7 +177,7 @@ module motor_gear() {
 module assembly() {
     base();
 
-    translate([0, 0, 30]) wheel();
+    translate([0, 0, 30]) wheel_assembly();
 
     rotate([0,0,-30])
     translate([180, -30, 0]) motor_mount();
@@ -143,18 +195,17 @@ module print_plate() {
     motor_gear();
 }
 
-// Print plate for the wheel pieces
-module wheel_print() {
-    for (i = [0:wheel_pieces-1])
-    translate([0, 2*i*wheel_height, 0])
-    rotate([90,0,0])
+module wheel_sectors_print(i) {
+    wheel_pieces = 6;
+    fudge = 0.5; // degrees
     difference() {
         intersection() {
-            rotate([0,0,i*360/wheel_pieces]) wheel();
+            rotate([0,0,(i+1/2)*360/wheel_pieces]) wheel_sectors();
+
             linear_extrude(h=1000)
             polygon([[0,0],
                      [1000, 0],
-                     [1000*cos(360/wheel_pieces), 1000*sin(360/wheel_pieces)]
+                     [1000*cos(360/wheel_pieces-fudge), 1000*sin(360/wheel_pieces-fudge)]
                     ]);
         }
 
@@ -206,8 +257,10 @@ module motor_mount() {
 }
 
 //print_plate();
-wheel_print();
+wheel_sectors_print(1);
+//wheel_center();
 
 //assembly();
 //motor_mount();
 
+//wheel_center();
