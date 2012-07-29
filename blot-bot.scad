@@ -94,7 +94,7 @@ module wheel_center() {
         rotate(theta)
         translate([0,-45,-wheel_height])
         linear_extrude(height=3*wheel_height)
-        dovetail(0.3);
+        dovetail(0.45);
     }
 }
 
