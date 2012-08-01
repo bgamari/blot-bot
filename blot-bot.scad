@@ -43,9 +43,9 @@ module base() {
             cube([arm_width, roller_r-4*bearing_width/2, bearing_outer_dia]);
             translate([0, roller_r+4*bearing_width/2, 0])
             difference() {
-                cube([arm_width, 80, bearing_outer_dia]);
+                cube([arm_width, 60, bearing_outer_dia]);
                 translate([-arm_width/2, 10, bearing_outer_dia/2])
-                cube([2*arm_width, 80-20, 4.5]);
+                cube([2*arm_width, 60-20, 4.5]);
             }
         }
 
@@ -85,7 +85,7 @@ module wheel_center() {
         regular_polygon(6, size);
 
         // Bearing
-        cylinder(r=bearing_outer_dia/2, h=2*bearing_width, center=true);
+        cylinder(r=bearing_outer_dia/2+0.5, h=2*bearing_width, center=true);
         cylinder(r=8/2, h=3*wheel_height);
 
         // Dovetails
@@ -179,8 +179,12 @@ module assembly() {
 
     translate([0, 0, 30]) wheel_assembly();
 
-    rotate([0,0,-30])
-    translate([180, -30, 0]) motor_mount();
+    translate([155, arm_width/2+5/2, 0]) {
+        motor_mount();
+        translate([0,0,30])
+        rotate([0,0,10])
+        #motor_gear();
+    }
 }
 
 // Print plate
@@ -197,7 +201,7 @@ module print_plate() {
 
 module wheel_sectors_print(i) {
     wheel_pieces = 6;
-    fudge = 0.5; // degrees
+    fudge = 0.1; // degrees
     difference() {
         intersection() {
             rotate([0,0,(i+1/2)*360/wheel_pieces]) wheel_sectors();
@@ -219,8 +223,9 @@ module wheel_sectors_print(i) {
 // Stepper motor mount
 module motor_mount() {
     size = 120;
-    mount_height = 100;
+    mount_height = 70;
     wall_thickness = 2;
+    rotate([0,0,-45])
     translate([0,0,mount_height/2])
     difference() {
         cube([size, size, mount_height], center=true);
@@ -229,9 +234,10 @@ module motor_mount() {
         cube([size-wall_thickness, size-wall_thickness, mount_height-wall_thickness],
             center=true);
 
+        // Cut out for wheel
         rotate([0,0,45])
-        translate([-size/4, 0, 0])
-        cube([size, 3*size, size/5], center=true);
+        translate([-size/4, 0, -0])
+        cube([size, 3*size, wheel_height*3], center=true);
 
         // Motor shaft hole
         cylinder(r=23/2, h=2*mount_height);
@@ -243,6 +249,7 @@ module motor_mount() {
         translate([1.725*mm_per_inch, 0, 0])
         cylinder(r=0.1968*mm_per_inch, h=50, center=true);
 
+        // Cut off top
         rotate([0,0,45])
         translate([-65, 0, mount_height/2])
         cube([100, 200, 22], center=true);
@@ -253,14 +260,19 @@ module motor_mount() {
             translate([size/2,0,0]) cube([10*wall_thickness, 0.8*size, 4], center=true);
         }
     }
-    motor_gear();
+
+    translate([70/2, 0, bearing_outer_dia/2])
+    difference() {
+        cube([70, 5, bearing_outer_dia], center=true);
+        cube([0.8*70, 10, 4.5], center=true);
+    }
 }
 
 //print_plate();
-wheel_sectors_print(1);
-//wheel_center();
+//wheel_sectors_print(2);
+//mirror([0,0,1]) wheel_center();
 
-//assembly();
+assembly();
 //motor_mount();
 
 //wheel_center();
