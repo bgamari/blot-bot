@@ -183,7 +183,7 @@ module assembly() {
         motor_mount();
         translate([0,0,30])
         rotate([0,0,10])
-        #motor_gear();
+        motor_gear();
     }
 }
 
@@ -223,7 +223,7 @@ module wheel_sectors_print(i) {
 // Stepper motor mount
 module motor_mount() {
     size = 120;
-    mount_height = 70;
+    mount_height = 60;
     wall_thickness = 2;
     rotate([0,0,-45])
     translate([0,0,mount_height/2])
@@ -247,24 +247,26 @@ module motor_mount() {
         for (theta = [45:90:360])
         rotate([0, 0, theta])
         translate([1.725*mm_per_inch, 0, 0])
-        cylinder(r=0.1968*mm_per_inch, h=50, center=true);
+        cylinder(r=3/2+0.5, h=50, center=true);
 
         // Cut off top
         rotate([0,0,45])
         translate([-65, 0, mount_height/2])
         cube([100, 200, 22], center=true);
 
+        // Cut out side
+        translate([-wall_thickness*2, 0, -mount_height/2])
+        cube([size, 2*size, 2*(bearing_outer_dia+1)], center=true);
 
-        translate([0,0,bearing_outer_dia/2 - mount_height/2]) {
-            translate([0,size/2,0]) cube([0.8*size, 10*wall_thickness, 4], center=true);
-            translate([size/2,0,0]) cube([10*wall_thickness, 0.8*size, 4], center=true);
-        }
+        translate([-8, 0, -25])
+        rotate([0, 10, 0])
+        cube([size, 2*size, mount_height], center=true);
     }
 
-    translate([70/2, 0, bearing_outer_dia/2])
+    translate([80/2, 0, bearing_outer_dia/2])
     difference() {
-        cube([70, 5, bearing_outer_dia], center=true);
-        cube([0.8*70, 10, 4.5], center=true);
+        cube([80, 5, bearing_outer_dia], center=true);
+        cube([0.8*80, 10, 4.5], center=true);
     }
 }
 
