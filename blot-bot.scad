@@ -162,7 +162,7 @@ module motor_gear() {
     difference() {
         gear(circular_pitch=gear_pitch, number_of_teeth=20,
             gear_thickness=wheel_height, rim_thickness=wheel_height,
-            hub_thickness=20, hub_diameter=20, bore_diameter=5.5);
+            hub_thickness=20, hub_diameter=20, bore_diameter=5.5+0.5);
 
         translate([4, 0, 10 + 5 - m3_nut_minor_dia/2])
         translate([0, 0, 20/2])
