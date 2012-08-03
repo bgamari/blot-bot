@@ -85,7 +85,7 @@ module wheel_center() {
         regular_polygon(6, size);
 
         // Bearing
-        cylinder(r=bearing_outer_dia/2+0.8, h=2*bearing_width, center=true);
+        cylinder(r=bearing_outer_dia/2+0.5, h=2*bearing_width, center=true);
         cylinder(r=8/2, h=3*wheel_height);
 
         // Dovetails
