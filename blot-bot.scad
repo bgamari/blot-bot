@@ -261,6 +261,10 @@ module print_plate() {
     translate([50, 0, bearing_outer_dia])
     rotate([180,0,0])
     base();
+
+    translate([50,80,wheel_height])
+    rotate([180,0,0])
+    wheel_center();
 }
 
 module wheel_sectors_print(i) {
