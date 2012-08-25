@@ -25,64 +25,124 @@ m3_nut_thickness = 2.5;
 
 gear_pitch = 400;
 
+center_r = 20;
+arm_flange_width = 3*arm_width;
+arm_flange_depth = 5;
+
 module bearing_holder() {
     translate([0, 0, bearing_outer_dia/2])
     difference() {
         cube([2*bearing_outer_dia, 4*bearing_width, bearing_outer_dia], center=true);
+
         translate([0, 0, 0.2*bearing_outer_dia]) {
-            rotate([90,0,0]) cylinder(r=bearing_inner_dia/2, h=3*bearing_width, center=true);
-            cube([1.2*bearing_outer_dia, 1.1*bearing_width, 1.1*bearing_outer_dia], center=true);
-            translate([0,0,50/2]) cube([bearing_inner_dia, 3*bearing_width, 50], center=true);
+            rotate([90,0,0])
+            cylinder(r=bearing_inner_dia/2, h=3*bearing_width, center=true);
+
+            cube([1.2*bearing_outer_dia, 1.1*bearing_width, 1.1*bearing_outer_dia],
+                 center=true);
+
+            translate([0,0,50/2])
+            cube([bearing_inner_dia, 3*bearing_width, 50], center=true);
         }
     }
 }
-    
-module base() {
-    module arm() {
-        translate([-arm_width/2, 0, 0]) {
-            cube([arm_width, roller_r-4*bearing_width/2, bearing_outer_dia]);
-            translate([0, roller_r+4*bearing_width/2, 0])
-            difference() {
-                cube([arm_width, 60, bearing_outer_dia]);
-                translate([-arm_width/2, 10, bearing_outer_dia/2])
-                cube([2*arm_width, 60-20, 4.5]);
-            }
-        }
 
-        translate([0, roller_r, 0])
-        bearing_holder();
+module arm_flange_holes() {
+    for (x = [-1,+1])
+    for (z = [3:5:bearing_outer_dia])
+    translate([x*0.85*arm_flange_width/2, 0, z])
+    rotate([90, 0, 0])
+    cylinder(r=3/2, h=100, center=true);
+}
+
+module base_arm() {
+    translate([0, center_r, 0])
+    difference() {
+        translate([-arm_flange_width/2, 0, 0])
+        cube([arm_flange_width, arm_flange_depth, bearing_outer_dia]);
+        arm_flange_holes();
     }
 
-    cylinder(r=bearing_inner_dia/2-0.1, h=50);
+    translate([-arm_width/2, 0, 0]) {
+        translate([0, center_r, 0])
+        cube([arm_width, roller_r-4*bearing_width/2-center_r, bearing_outer_dia]);
+
+        translate([0, roller_r+4*bearing_width/2, 0])
+        difference() {
+            cube([arm_width, 60, bearing_outer_dia]);
+            translate([-arm_width/2, 10, bearing_outer_dia/2])
+            cube([2*arm_width, 60-20, 4.5]);
+        }
+    }
+
+    translate([0, roller_r, 0])
+    bearing_holder();
+}
+
+module base_center() {
+    difference() {
+        linear_extrude(height=bearing_outer_dia)
+        regular_polygon(n=4, min_r=center_r);
+
+        cylinder(r=bearing_inner_dia/2+0.1, h=3*bearing_outer_dia, center=true);
+
+        for (theta = [0:360/n_arms:360])
+        rotate(theta)
+        arm_flange_holes();
+
+        // center bolt head
+        cylinder(r=18/2, h=12, center=true);
+    }
+}
+
+module base() {
+    base_center();
 
     for (theta=[0:360/n_arms:360])
     rotate([0,0,theta])
-    arm();
+    base_arm();
 }
 
 module bearing_pin() {
     cylinder(r=0.97*bearing_inner_dia/2, h=2.9*bearing_width);
 }
 
-module dovetail(fudge=0) {
-    a = 5 + fudge;
-    b = 15 + fudge;
-    c = 15;
-    polygon([[-a,0], [-b,c], [b,c], [a,0]]);
+// Dovetail
+//
+//        |-- b --|
+//        _________  _
+//        \       /  |
+//         \     /   |c   
+//          \___/    |
+//                   -
+//          |---|
+//            a
+module dovetail(a=10, b=30, c=15, fudge=0) {
+    aa = a/2 + fudge;
+    bb = b/2 + fudge;
+    cc = c;
+    polygon([[-aa,0], [-bb,cc], [bb,cc], [aa,0]]);
 }
 
 module regular_polygon(n, min_r) {
-    for (theta = [0:360/n:360])
-    rotate(theta)
-    square([min_r, min_r/tan(360/n)], center=true);
+    if (n==3) {
+        echo("regular_polygon: unimplemented: triangles");
+    } else if (n==4) {
+        square([2*min_r, 2*min_r], center=true);
+    } else if (n > 4) {
+        for (theta = [0:360/n:360])
+        rotate(theta)
+        translate([0, -min_r*tan(360/n/2)])
+        square([min_r, 2*min_r*tan(360/n/2)]);
+    }
 }
 
 module wheel_center() {
-    size = 89;
+    size = 44.7;
 
     difference() {
         linear_extrude(height=wheel_height)
-        regular_polygon(6, size);
+        #regular_polygon(6, size);
 
         // Bearing
         cylinder(r=bearing_outer_dia/2+0.5, h=2*bearing_width, center=true);
@@ -187,15 +247,22 @@ module assembly() {
     }
 }
 
-// Print plate
-module print_plate() {
-    base();
+// Print plates
+module print_plate_1() {
+    translate([0, -100, 0]) {
+        for (i = [0:n_arms])
+        translate([50*i-100, 0, 0]) base_arm();
+    }
+}
 
-    for (i=[0:n_arms])
-    translate([100+3*bearing_inner_dia*i,0,0])
+module print_plate_2() {
+    base_center();
+
+    for (i=[1:n_arms])
+    translate([40, 2*bearing_inner_dia*i, 0])
     bearing_pin();
 
-    translate([-80, 0, 0])
+    translate([-60, 0, 0])
     motor_gear();
 }
 
@@ -270,9 +337,11 @@ module motor_mount() {
     }
 }
 
-//print_plate();
+//print_plate_1();
+//print_plate_2();
 //wheel_sectors_print(2);
-//mirror([0,0,1]) wheel_center();
+
+//base();
 
 assembly();
 //motor_mount();
