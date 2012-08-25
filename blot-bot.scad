@@ -88,7 +88,7 @@ module base() {
         cylinder(r=bearing_inner_dia/2+0.7, h=3*bearing_outer_dia, center=true);
 
         // center bolt head
-        cylinder(r=18/2, h=12, center=true); // TODO: Check size
+        cylinder(r=18/2, h=15, center=true);
     }
 }
 
