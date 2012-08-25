@@ -258,7 +258,8 @@ module print_plate() {
     translate([0, -30, 0])
     motor_gear();
 
-    translate([40, 0, 0])
+    translate([50, 0, bearing_outer_dia])
+    rotate([180,0,0])
     base();
 }
 
