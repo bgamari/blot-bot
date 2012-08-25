@@ -29,13 +29,13 @@ gear_pitch = 400;
 
 base_size = 20;
 base_rod_offset = 12;
-bearing_holder_angle = 10;
+bearing_holder_angle = 6;
 
 
 module bearing_holder(rod_height) {
     translate([0, 0, bearing_outer_dia/2])
     difference() {
-        cube([2*bearing_outer_dia, 4*bearing_width, bearing_outer_dia], center=true);
+        cube([1.5*bearing_outer_dia, 3.5*bearing_width, bearing_outer_dia], center=true);
 
         translate([0, 0, 0.2*bearing_outer_dia]) {
             rotate([90,0,0])
@@ -58,12 +58,12 @@ module bearing_mount() {
             bearing_holder();
 
             translate([0, roller_r, 0])
-            translate([0*bearing_outer_dia, -10, 0])
-            cube([20, 10, bearing_outer_dia]);
+            translate([2, -10, 0])
+            cube([18, 10, bearing_outer_dia]);
         }
 
         for (z = [2, 12])
-        translate([base_rod_offset, 0, 3+z])
+        translate([base_rod_offset, 0, threaded_rod_dia/2+z])
         rotate([90,0,0])
         cylinder(r=threaded_rod_dia/2, h=300, center=true);
     }
@@ -79,7 +79,7 @@ module base() {
         for (theta = [0, 90]) {
             rotate([0,0,theta])
             translate([i*base_rod_offset, 0, 0])
-            for (z = [12, 2])
+            for (z = [2, 12])
             translate([0, 0, threaded_rod_dia/2+z])
             rotate([90,0,0]) cylinder(r=threaded_rod_dia/2, h=250, center=true);
         }
