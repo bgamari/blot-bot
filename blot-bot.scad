@@ -25,11 +25,12 @@ m3_nut_thickness = 2.5;
 
 gear_pitch = 400;
 
-center_r = 20;
-arm_flange_width = 3*arm_width;
-arm_flange_depth = 5;
+base_size = 18;
+base_rod_offset = 12;
+bearing_holder_angle = 10;
 
-module bearing_holder() {
+
+module bearing_holder(rod_height) {
     translate([0, 0, bearing_outer_dia/2])
     difference() {
         cube([2*bearing_outer_dia, 4*bearing_width, bearing_outer_dia], center=true);
@@ -47,60 +48,54 @@ module bearing_holder() {
     }
 }
 
-module arm_flange_holes() {
-    for (x = [-1,+1])
-    for (z = [3:5:bearing_outer_dia])
-    translate([x*0.85*arm_flange_width/2, 0, z])
-    rotate([90, 0, 0])
-    cylinder(r=3/2, h=100, center=true);
-}
-
-module base_arm() {
-    translate([0, center_r, 0])
+module bearing_mount() {
     difference() {
-        translate([-arm_flange_width/2, 0, 0])
-        cube([arm_flange_width, arm_flange_depth, bearing_outer_dia]);
-        arm_flange_holes();
-    }
+        union() {
+            rotate([0, 0, bearing_holder_angle])
+            translate([0, roller_r, 0])
+            bearing_holder();
 
-    translate([-arm_width/2, 0, 0]) {
-        translate([0, center_r, 0])
-        cube([arm_width, roller_r-4*bearing_width/2-center_r, bearing_outer_dia]);
-
-        translate([0, roller_r+4*bearing_width/2, 0])
-        difference() {
-            cube([arm_width, 60, bearing_outer_dia]);
-            translate([-arm_width/2, 10, bearing_outer_dia/2])
-            cube([2*arm_width, 60-20, 4.5]);
+            translate([0, roller_r, 0])
+            translate([0*bearing_outer_dia, -10, 0])
+            cube([20, 10, bearing_outer_dia]);
         }
-    }
 
-    translate([0, roller_r, 0])
-    bearing_holder();
-}
-
-module base_center() {
-    difference() {
-        linear_extrude(height=bearing_outer_dia)
-        regular_polygon(n=4, min_r=center_r);
-
-        cylinder(r=bearing_inner_dia/2+0.1, h=3*bearing_outer_dia, center=true);
-
-        for (theta = [0:360/n_arms:360])
-        rotate(theta)
-        arm_flange_holes();
-
-        // center bolt head
-        cylinder(r=18/2, h=12, center=true);
+        for (z = [2, 12])
+        translate([base_rod_offset, 0, 3+z])
+        rotate([90,0,0])
+        cylinder(r=8.1/2, h=300, center=true);
     }
 }
 
 module base() {
-    base_center();
+    difference() {
+        linear_extrude(height=bearing_outer_dia)
+        regular_polygon(n=4, min_r=base_size);
 
-    for (theta=[0:360/n_arms:360])
+        // Holes for rods
+        for (i = [+1, -1])
+        for (theta = [0, 90]) {
+            rotate([0,0,theta])
+            translate([i*base_rod_offset, 0, 0])
+            for (z = [12, 2])
+            translate([0, 0, 8/2+z])
+            rotate([90,0,0]) cylinder(r=8.1/2, h=250, center=true);
+        }
+
+        // center bolt
+        cylinder(r=bearing_inner_dia/2+0.1, h=3*bearing_outer_dia, center=true);
+
+        // center bolt head
+        cylinder(r=18/2, h=12, center=true); // TODO: Check size
+    }
+}
+
+module base_assembly() {
+    base();
+
+    for (theta = [0:360/n_arms:360])
     rotate([0,0,theta])
-    base_arm();
+    bearing_mount();
 }
 
 module bearing_pin() {
@@ -142,7 +137,7 @@ module wheel_center() {
 
     difference() {
         linear_extrude(height=wheel_height)
-        #regular_polygon(6, size);
+        regular_polygon(6, size);
 
         // Bearing
         cylinder(r=bearing_outer_dia/2+0.5, h=2*bearing_width, center=true);
@@ -235,7 +230,7 @@ module motor_gear() {
 
 // Assembly diagram
 module assembly() {
-    base();
+    base_assembly();
 
     translate([0, 0, 30]) wheel_assembly();
 
@@ -250,7 +245,7 @@ module assembly() {
 // Print plates
 module print_plate_1() {
     translate([0, -100, 0]) {
-        for (i = [0:n_arms])
+        for (i = [1:n_arms])
         translate([50*i-100, 0, 0]) base_arm();
     }
 }
@@ -341,9 +336,10 @@ module motor_mount() {
 //print_plate_2();
 //wheel_sectors_print(2);
 
-//base();
+//base_assembly();
 
 assembly();
 //motor_mount();
 
 //wheel_center();
+
