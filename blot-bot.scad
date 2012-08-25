@@ -25,7 +25,7 @@ m3_nut_thickness = 2.5;
 
 gear_pitch = 400;
 
-base_size = 18;
+base_size = 20;
 base_rod_offset = 12;
 bearing_holder_angle = 10;
 
