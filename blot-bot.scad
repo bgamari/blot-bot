@@ -243,22 +243,21 @@ module assembly() {
 }
 
 // Print plates
-module print_plate_1() {
-    translate([0, -100, 0]) {
+module print_plate() {
+    translate([-50, -220, 0]) {
         for (i = [1:n_arms])
-        translate([50*i-100, 0, 0]) base_arm();
+        translate([0, 40*i, 0]) bearing_mount();
     }
-}
-
-module print_plate_2() {
-    base_center();
 
     for (i=[1:n_arms])
-    translate([40, 2*bearing_inner_dia*i, 0])
+    translate([0, 2*bearing_inner_dia*i, 0])
     bearing_pin();
 
-    translate([-60, 0, 0])
+    translate([0, -30, 0])
     motor_gear();
+
+    translate([40, 0, 0])
+    base();
 }
 
 module wheel_sectors_print(i) {
@@ -332,11 +331,8 @@ module motor_mount() {
     }
 }
 
-//print_plate_1();
-//print_plate_2();
+//print_plate();
 //wheel_sectors_print(2);
-
-//base_assembly();
 
 assembly();
 //motor_mount();
