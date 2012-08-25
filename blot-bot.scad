@@ -20,6 +20,8 @@ bearing_width = 7;
 bearing_outer_dia = 22;
 bearing_inner_dia = 8;
 
+threaded_rod_dia = 8.7;
+
 m3_nut_minor_dia = 5.5;
 m3_nut_thickness = 2.5;
 
@@ -63,7 +65,7 @@ module bearing_mount() {
         for (z = [2, 12])
         translate([base_rod_offset, 0, 3+z])
         rotate([90,0,0])
-        cylinder(r=8.1/2, h=300, center=true);
+        cylinder(r=threaded_rod_dia/2, h=300, center=true);
     }
 }
 
@@ -78,12 +80,12 @@ module base() {
             rotate([0,0,theta])
             translate([i*base_rod_offset, 0, 0])
             for (z = [12, 2])
-            translate([0, 0, 8/2+z])
-            rotate([90,0,0]) cylinder(r=8.1/2, h=250, center=true);
+            translate([0, 0, threaded_rod_dia/2+z])
+            rotate([90,0,0]) cylinder(r=threaded_rod_dia/2, h=250, center=true);
         }
 
         // center bolt
-        cylinder(r=bearing_inner_dia/2+0.1, h=3*bearing_outer_dia, center=true);
+        cylinder(r=bearing_inner_dia/2+0.7, h=3*bearing_outer_dia, center=true);
 
         // center bolt head
         cylinder(r=18/2, h=12, center=true); // TODO: Check size
@@ -141,7 +143,7 @@ module wheel_center() {
 
         // Bearing
         cylinder(r=bearing_outer_dia/2+0.5, h=2*bearing_width, center=true);
-        cylinder(r=8/2, h=3*wheel_height);
+        cylinder(r=threaded_rod_dia/2, h=3*wheel_height);
 
         // Dovetails
         rotate(360/12)
