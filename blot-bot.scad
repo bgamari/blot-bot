@@ -37,7 +37,7 @@ module bearing_holder(rod_height) {
     difference() {
         cube([1.5*bearing_outer_dia, 3.5*bearing_width, bearing_outer_dia], center=true);
 
-        translate([0, 0, 0.2*bearing_outer_dia]) {
+        translate([0, 0, 0.3*bearing_outer_dia]) {
             rotate([90,0,0])
             cylinder(r=bearing_inner_dia/2, h=3*bearing_width, center=true);
 
