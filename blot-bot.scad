@@ -101,7 +101,7 @@ module base_assembly() {
 }
 
 module bearing_pin() {
-    cylinder(r=0.97*bearing_inner_dia/2, h=2.9*bearing_width);
+    cylinder(r=0.95*bearing_inner_dia/2, h=2.9*bearing_width);
 }
 
 // Dovetail
